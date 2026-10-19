@@ -1,0 +1,11 @@
+{
+  "name": "aetherfall-ring-of-the-nine-realms",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "英灵纪元 · 九界之环 — 第三人称开放世界（北欧神话） / Three.js",
+  "scripts": {
+    "start": "node server.mjs 8080",
+    "dev": "node server.mjs 8080"
+  }
+}

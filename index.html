@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#07090d" />
+<title>英灵纪元 · 九界之环 — AETHERFALL</title>
+<link rel="preload" href="./assets/fonts/cinzel-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="./src/ui/styles/theme.css" />
+<link rel="stylesheet" href="./src/ui/styles/hud.css" />
+<link rel="stylesheet" href="./src/ui/styles/inventory.css" />
+<link rel="stylesheet" href="./src/ui/styles/mapquest.css" />
+</head>
+<body>
+  <!-- 3D 舞台 -->
+  <canvas id="stage" aria-label="game viewport"></canvas>
+
+  <!-- UI 根 -->
+  <div id="ui-root">
+    <div id="hud" aria-live="polite"></div>
+    <div id="panel-layer"></div>
+    <div id="toast-layer"></div>
+    <div id="banner-layer"></div>
+  </div>
+
+  <!-- 电影感叠层 -->
+  <div id="fx-vignette" aria-hidden="true"></div>
+  <div id="fx-grain" aria-hidden="true"></div>
+
+  <!-- 载入屏 -->
+  <div id="loading-screen" class="overlay">
+    <div class="loading__inner">
+      <div class="loading__sigil" aria-hidden="true">
+        <svg viewBox="0 0 200 200" class="rune-ring">
+          <circle cx="100" cy="100" r="92" class="ring ring--outer" />
+          <circle cx="100" cy="100" r="78" class="ring ring--inner" />
+          <circle cx="100" cy="100" r="56" class="ring ring--dashed" />
+          <g class="runes">
+            <text x="100" y="26">ᚠ</text><text x="151" y="45">ᚢ</text><text x="170" y="94">ᚦ</text>
+            <text x="160" y="146">ᚨ</text><text x="120" y="176">ᚱ</text><text x="72" y="176">ᚲ</text>
+            <text x="34" y="150">ᚷ</text><text x="22" y="98">ᚹ</text><text x="40" y="48">ᚺ</text>
+            <text x="88" y="150">ᛁ</text>
+          </g>
+          <path class="valknut" d="M100 52 L139 118 L61 118 Z M100 108 L122 74 L78 74 Z" />
+        </svg>
+      </div>
+      <div class="loading__eyebrow latin">AETHERFALL</div>
+      <div class="loading__title">九 界 之 环</div>
+      <div class="loading__bar"><i id="loading-fill"></i></div>
+      <div class="loading__status" id="loading-status">正在编织世界……</div>
+      <div class="loading__tip" id="loading-tip"></div>
+    </div>
+  </div>
+
+  <!-- 标题界面 -->
+  <div id="title-screen" class="overlay hidden">
+    <div class="title__backdrop"></div>
+    <div class="title__content">
+      <div class="title__eyebrow latin">AN OPEN WORLD OF NORTHERN MYTH</div>
+      <h1 class="title__main">英 灵 纪 元</h1>
+      <div class="title__latin latin">AETHERFALL &nbsp;·&nbsp; RING OF THE NINE REALMS</div>
+      <div class="rune-divider title__divider" aria-hidden="true"></div>
+      <p class="title__sub">诸神的黄昏已经降临。<br />九界的火种熄灭，唯余灰烬与长夜。<br />你是最后一位被唤醒的英灵——去点亮回归的环。</p>
+      <div class="title__actions">
+        <button id="btn-start" class="btn btn--gold btn--lg">开始旅程<span class="latin">BEGIN THE JOURNEY</span></button>
+        <button id="btn-continue" class="btn btn--ghost btn--lg hidden">继续旅程<span class="latin">CONTINUE</span></button>
+        <button id="btn-help" class="btn btn--ghost">操作与传说<span class="latin">CODEX</span></button>
+      </div>
+      <div class="title__meta">
+        <span>程序化生成世界 · 2000 × 2000 米</span>
+        <span class="dot">·</span>
+        <span>第三视角 · 开放世界 · 北欧神话</span>
+      </div>
+    </div>
+    <div class="title__corner title__corner--br latin">BUILD <span id="build-stamp">0.1</span> · THREE.JS</div>
+  </div>
+
+  <!-- 帮助 / 图鉴 -->
+  <div id="help-screen" class="overlay hidden">
+    <div class="panel help-panel">
+      <div class="panel-frame">
+        <header class="panel-head">
+          <div class="panel-head__text">
+            <h2 class="panel-title">操作与传说</h2>
+            <div class="panel-sub latin">CONTROLS &amp; LORE</div>
+          </div>
+          <button class="btn-icon" data-close-help aria-label="关闭">✕</button>
+        </header>
+        <div class="rune-divider"></div>
+        <div class="panel-body help-body">
+          <div class="help-col">
+            <h3>行走于九界</h3>
+            <div class="rows">
+              <div class="row"><span class="k">移动</span><span class="v"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span></div>
+              <div class="row"><span class="k">疾跑 / 跳跃</span><span class="v"><kbd>Shift</kbd> / <kbd>Space</kbd></span></div>
+              <div class="row"><span class="k">视角</span><span class="v">鼠标 / <kbd>Q</kbd><kbd>E</kbd> 旋转</span></div>
+              <div class="row"><span class="k">交互</span><span class="v"><kbd>F</kbd></span></div>
+              <div class="row"><span class="k">攻击</span><span class="v">左键 / <kbd>J</kbd></span></div>
+            </div>
+          </div>
+          <div class="help-col">
+            <h3>界面</h3>
+            <div class="rows">
+              <div class="row"><span class="k">行囊</span><span class="v"><kbd>I</kbd></span></div>
+              <div class="row"><span class="k">状态</span><span class="v"><kbd>C</kbd></span></div>
+              <div class="row"><span class="k">地图</span><span class="v"><kbd>M</kbd> / <kbd>Tab</kbd></span></div>
+              <div class="row"><span class="k">任务</span><span class="v"><kbd>L</kbd></span></div>
+              <div class="row"><span class="k">存档 / 读档</span><span class="v"><kbd>F5</kbd> / <kbd>F9</kbd></span></div>
+              <div class="row"><span class="k">性能信息</span><span class="v"><kbd>F3</kbd></span></div>
+            </div>
+          </div>
+          <div class="help-col help-col--lore">
+            <h3>九界之环</h3>
+            <p>传说中，世界树尤克特拉希尔的根系贯穿九界。诸神黄昏后，金宫的火种尽数熄灭，
+              霜巨人的长冬自约顿海姆蔓延。唯有点亮散布于世界的九座圣火灯塔，
+              才能重新编织命运之环——而灯塔的火焰，需要「符文石」作为引信。</p>
+            <p class="dim">「你听见了号角声吗，英灵？那不是终结，那是召唤。」</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 致命错误提示 -->
+  <div id="boot-error" class="hidden">
+    <div class="boot-error__box">
+      <h2>世界编织失败</h2>
+      <pre id="boot-error-msg"></pre>
+      <p>请打开浏览器控制台查看详细堆栈。</p>
+    </div>
+  </div>
+
+  <script>
+    // 启动期异常兜底：任何未捕获错误都会显示在屏幕上，方便排查。
+    window.addEventListener('error', (e) => {
+      const box = document.getElementById('boot-error');
+      const msg = document.getElementById('boot-error-msg');
+      if (!box || !msg) return;
+      msg.textContent = (e.error && e.error.stack) || e.message || String(e);
+      box.classList.remove('hidden');
+    });
+    window.addEventListener('unhandledrejection', (e) => {
+      const box = document.getElementById('boot-error');
+      const msg = document.getElementById('boot-error-msg');
+      if (!box || !msg) return;
+      msg.textContent = (e.reason && e.reason.stack) || String(e.reason);
+      box.classList.remove('hidden');
+    });
+  </script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three.module.js",
+        "three/addons/": "./vendor/"
+      }
+    }
+  </script>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
